@@ -106,7 +106,7 @@ export default function LantrLanding() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center h-20">
           <button onClick={() => scrollToSection('hero')} className="flex items-center gap-3 hover:opacity-80 transition">
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-lime-400 rounded-[12px]"></div>
-            <span className="text-2xl font-bold text-white">Lantr</span>
+            <span className="text-2xl font-bold text-white">lantr</span>
           </button>
           
           <nav className="hidden md:flex items-center gap-10">
