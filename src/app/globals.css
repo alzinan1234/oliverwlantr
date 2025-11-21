@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --muted-text: #B3BAC0;
+  --muted-2: #9AA3AB;
 }
 
 @theme inline {
@@ -32,6 +34,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
+}
+
+/* Typography refinements to match prototype */
+h1, .h1 {
+  line-height: 1.05;
+}
+
+h2, .h2 {
+  line-height: 1.12;
+}
+
+p, .lead, .muted {
+  color: var(--muted-text);
 }
 
 /* Custom Scrollbar */
