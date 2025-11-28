@@ -74,8 +74,8 @@ export default function LantrLanding() {
 
   const faqs = [
     { question: 'What is Lantr?', answer: 'Lantr is a platform connecting fans, artists, and venues. We make it easy to discover live music, book shows, and build meaningful connections within your local music community.' },
-    { question: 'When will Lantr launch?', answer: 'We\'re currently in development and planning to launch in early 2024. Join our waitlist to be notified when we go live and get early access to the platform.' },
-    { question: 'Is Lantr free to use?', answer: 'Yes! Lantr is free for fans to discover and connect with artists. Artists and venues will have access to free basic features, with premium tools available for serious professionals.' },
+  { question: 'When will Lantr launch?', answer: 'We\'re currently in development and planning to launch in early 2026. Join our waitlist to be notified when we go live and get early access to the platform.' },
+  { question: 'Is Lantr free to use?', answer: 'Yes — during early development Lantr is fully free for all users. We plan to introduce optional premium features later for certain advanced tools and professional users.' },
     { question: 'How do I sign up as an artist?', answer: 'Simply join our waitlist and select "Artist" as your user type. When we launch, you\'ll receive priority access to create your artist profile and start connecting with fans.' },
     { question: 'Can venues list their events?', answer: 'Absolutely! Venues can create profiles, list their events, and connect directly with artists looking for performance opportunities in their area.' },
     { question: 'What cities will Lantr be available in?', answer: 'We\'re starting with Sydney and other major Australian cities. We plan to expand nationally and internationally based on demand.' }
@@ -314,7 +314,7 @@ export default function LantrLanding() {
         </div>
 
         <div className="mt-16 text-center">
-          <p className="text-[#B3BAC0] mb-8 font-light">Join 500+ people already on the waitlist</p>
+          <p className="text-[#B3BAC0] mb-8 font-light">Join early supporters on the waitlist</p>
           <div className="flex justify-center items-center gap-2">
             <div className="flex -space-x-3">
               {waitIcons.map((Icon, i) => (
