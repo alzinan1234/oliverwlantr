@@ -5,17 +5,19 @@ import { Menu, X, ChevronDown, CheckCircle, Circle, Music, Users, MapPin, Mail, 
 export default function LantrLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', userType: 'fan' })
+  const [formData, setFormData] = useState({ name: '', email: '', userType: 'FAN' })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [openFAQ, setOpenFAQ] = useState(null)
   const [errors, setErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
+  }, [])   
+  
   const scrollToSection = (id) => {
     const element = document.getElementById(id)
     if (element) {
@@ -24,39 +26,103 @@ export default function LantrLanding() {
     }
   }
 
-  const validateForm = () => {
-    const newErrors = {}
-    if (!formData.name.trim()) newErrors.name = 'Name is required'
-    if (!formData.email.trim()) newErrors.email = 'Email is required'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email'
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   }
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!validateForm()) return
-    
-    console.log('Form submitted:', formData)
-    setIsSubmitted(true)
-    
-    setTimeout(() => {
-      setIsSubmitted(false)
-      setFormData({ name: '', email: '', userType: 'fan' })
-      setErrors({})
-    }, 3000)
-  }
+    e.preventDefault();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }))
-  }
+    // Validate
+    const newErrors = {};
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    // Create hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.name = 'hidden_iframe';
+    iframe.style.display = 'none';
+    iframe.onload = () => {
+      setTimeout(() => {
+        setIsSubmitted(true);
+        setIsSubmitting(false);
+        setFormData({ name: '', email: '', userType: 'FAN' }); // Clear form fields
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+      }, 1000);
+    };
+
+    iframe.onerror = () => {
+      setSubmitError('Failed to submit form. Please try again.');
+      setIsSubmitting(false);
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    };
+
+    document.body.appendChild(iframe);
+
+    // Create form with CORRECT Google Form IDs
+    const form = document.createElement('form');
+    form.action = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLSc21TBRAHS76qdnl99FG_uqjGd4wdXr35aqmUDFiSvI1-5D1g/formResponse';
+    form.method = 'POST';
+    form.target = 'hidden_iframe';
+
+    // Add fields with CORRECT field IDs
+    const fields = {
+      'entry.2124340020': formData.name,      // Full Name field
+      'entry.889440736': formData.email,      // Email field
+      'entry.1347005299': formData.userType,  // Role field (FAN/ARTIST/VENUE)
+      'fvv': '1',
+      'partialResponse': '[null,null,"3347796408466419238"]',
+      'pageHistory': '0', 
+      'fbzx': '3347796408466419238',
+      'submissionTimestamp': '-1'
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    
+    try {
+      form.submit();
+    } catch (error) {
+      console.error('Submission error:', error);
+      setSubmitError('Something went wrong. Please try again.');
+      setIsSubmitting(false);
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }
+  };
 
   const userTypes = [
-    { value: 'fan', label: 'Fan', description: 'I want to discover live music and connect with artists', icon: <Music size={24} className="text-[#0094FF]" /> },
-    { value: 'artist', label: 'Artist', description: 'I want to build my fanbase and perform at venues', icon: <UserPlus size={24} className="text-[#0094FF]" /> },
-    { value: 'venue', label: 'Venue', description: 'I want to host events and connect with artists', icon: <Circle size={24} className="text-[#0094FF]" /> }
+    { value: 'FAN', label: 'Fan', description: 'I want to discover live music and connect with artists', icon: <Music size={24} className="text-[#0094FF]" /> },
+    { value: 'ARTIST', label: 'Artist', description: 'I want to build my fanbase and perform at venues', icon: <UserPlus size={24} className="text-[#0094FF]" /> },
+    { value: 'VENUE', label: 'Venue', description: 'I want to host events and connect with artists', icon: <Circle size={24} className="text-[#0094FF]" /> }
   ]
 
   const steps = [
@@ -74,8 +140,8 @@ export default function LantrLanding() {
 
   const faqs = [
     { question: 'What is Lantr?', answer: 'Lantr is a platform connecting fans, artists, and venues. We make it easy to discover live music, book shows, and build meaningful connections within your local music community.' },
-    { question: 'When will Lantr launch?', answer: 'We\'re currently in development and planning to launch in early 2024. Join our waitlist to be notified when we go live and get early access to the platform.' },
-    { question: 'Is Lantr free to use?', answer: 'Yes! Lantr is free for fans to discover and connect with artists. Artists and venues will have access to free basic features, with premium tools available for serious professionals.' },
+    { question: 'When will Lantr launch?', answer: 'We\'re currently in development and planning to launch in early 2026. Join our waitlist to be notified when we go live and get early access to the platform.' },
+    { question: 'Is Lantr free to use?', answer: 'Lantr is completely free for all users during early development. Premium features will be introduced later for specific user needs.' },
     { question: 'How do I sign up as an artist?', answer: 'Simply join our waitlist and select "Artist" as your user type. When we launch, you\'ll receive priority access to create your artist profile and start connecting with fans.' },
     { question: 'Can venues list their events?', answer: 'Absolutely! Venues can create profiles, list their events, and connect directly with artists looking for performance opportunities in their area.' },
     { question: 'What cities will Lantr be available in?', answer: 'We\'re starting with Sydney and other major Australian cities. We plan to expand nationally and internationally based on demand.' }
@@ -88,7 +154,7 @@ export default function LantrLanding() {
       { name: 'Features', href: 'how-it-works' },
       { name: 'Examples', href: 'examples' },
       { name: 'Waitlist', href: 'waitlist' },
-      { name: 'FAQ', href: 'faq' }
+      { name: 'FAQ', href: 'faq' },
     ],
     company: [{ name: 'About', href: '#' }, { name: 'Blog', href: '#' }, { name: 'Careers', href: '#' }, { name: 'Press', href: '#' }],
     legal: [{ name: 'Privacy Policy', href: '#' }, { name: 'Terms of Service', href: '#' }, { name: 'Cookie Policy', href: '#' }]
@@ -250,15 +316,30 @@ export default function LantrLanding() {
               <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle size={40} className="text-green-500" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">You&apos;re on the list!</h3>
-              <p className="text-[#B3BAC0]">We&apos;ll send you updates to <span className="text-[#0094FF] font-semibold">{formData.email}</span></p>
-              <p className="text-sm text-[#9AA3AB] mt-4">You&apos;re registered as a <span className="capitalize text-[#33A9FF]">{formData.userType}</span></p>
+              <h3 className="text-2xl font-bold text-white mb-2">Thanks — you're on the waitlist!</h3>
+              <p className="text-[#B3BAC0]">We'll send you updates to <span className="text-[#0094FF] font-semibold">{formData.email}</span></p>
+              <p className="text-sm text-[#9AA3AB] mt-4">You're registered as a <span className="capitalize text-[#33A9FF]">{formData.userType.toLowerCase()}</span></p>
+              <button 
+                onClick={() => {
+                  setIsSubmitted(false);
+                  setFormData({ name: '', email: '', userType: 'FAN' });
+                }}
+                className="mt-6 px-6 py-2 bg-transparent hover:bg-[#1D1F2F] rounded-lg font-semibold transition border border-[#1E2024] text-sm"
+              >
+                Add Another Person
+              </button>
             </div>
           ) : (
             <div className="space-y-6">
               <div className="mb-6 p-4 bg-[#0094FF]/10 border border-[#0094FF]/30 rounded-lg">
-                <p className="text-sm text-[#B3BAC0]"><span className="text-[#0094FF] font-semibold">Registering as:</span> <span className="capitalize text-white">{formData.userType}</span></p>
+                <p className="text-sm text-[#B3BAC0]"><span className="text-[#0094FF] font-semibold">Registering as:</span> <span className="capitalize text-white">{formData.userType.toLowerCase()}</span></p>
               </div>
+
+              {submitError && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-sm text-red-400">{submitError}</p>
+                </div>
+              )}
 
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-white mb-3">Full Name <span className="text-red-500">*</span></label>
@@ -272,9 +353,10 @@ export default function LantrLanding() {
                     name="name" 
                     required 
                     value={formData.name} 
-                    onChange={handleChange} 
+                    onChange={handleChange}
+                    disabled={isSubmitting}
                     placeholder="Enter your full name" 
-                    className={`w-full pl-12 pr-4 py-4 bg-[#0B0C0E] border rounded-xl text-white placeholder-[#9AA3AB] focus:outline-none transition-all ${errors.name ? 'border-red-500' : 'border-[#1E2024] focus:border-[#0094FF]'}`} 
+                    className={`w-full pl-12 pr-4 py-4 bg-[#0B0C0E] border rounded-xl text-white placeholder-[#9AA3AB] focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${errors.name ? 'border-red-500' : 'border-[#1E2024] focus:border-[#0094FF]'}`} 
                   />
                 </div>
                 {errors.name && <p className="text-red-500 text-xs mt-2">{errors.name}</p>}
@@ -292,9 +374,10 @@ export default function LantrLanding() {
                     name="email" 
                     required 
                     value={formData.email} 
-                    onChange={handleChange} 
+                    onChange={handleChange}
+                    disabled={isSubmitting}
                     placeholder="your@email.com" 
-                    className={`w-full pl-12 pr-4 py-4 bg-[#0B0C0E] border rounded-xl text-white placeholder-[#9AA3AB] focus:outline-none transition-all ${errors.email ? 'border-red-500' : 'border-[#1E2024] focus:border-[#0094FF]'}`} 
+                    className={`w-full pl-12 pr-4 py-4 bg-[#0B0C0E] border rounded-xl text-white placeholder-[#9AA3AB] focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed ${errors.email ? 'border-red-500' : 'border-[#1E2024] focus:border-[#0094FF]'}`} 
                   />
                 </div>
                 {errors.email && <p className="text-red-500 text-xs mt-2">{errors.email}</p>}
@@ -302,10 +385,10 @@ export default function LantrLanding() {
 
               <button 
                 onClick={handleSubmit} 
-                disabled={!formData.name || !formData.email} 
+                disabled={!formData.name || !formData.email || isSubmitting} 
                 className="w-full px-8 py-4 bg-[#0094FF] hover:bg-[#33A9FF] text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-base hover:-translate-y-0.5"
               >
-                Request access
+                {isSubmitting ? 'Submitting...' : 'Request access'}
               </button>
 
               <p className="text-xs text-[#9AA3AB] text-center">By joining, you agree to receive updates about Lantr. We respect your privacy and you can unsubscribe anytime.</p>
@@ -314,7 +397,7 @@ export default function LantrLanding() {
         </div>
 
         <div className="mt-16 text-center">
-          <p className="text-[#B3BAC0] mb-8 font-light">Join 500+ people already on the waitlist</p>
+          <p className="text-[#B3BAC0] mb-8 font-light">Join early supporters on the waitlist</p>
           <div className="flex justify-center items-center gap-2">
             <div className="flex -space-x-3">
               {waitIcons.map((Icon, i) => (
@@ -350,7 +433,7 @@ export default function LantrLanding() {
             </div>
           ))}
         </div>
-      </section>
+      </section>   
 
       {/* Footer */}
       <footer className="border-t border-[#1E2024] py-24 px-6 bg-black">
@@ -376,42 +459,42 @@ export default function LantrLanding() {
                     <li key={i}>
                       {link.href.startsWith('#') ? (
                         <button onClick={() => scrollToSection(link.href)} className="text-[#9CA3AF] hover:text-[#0094FF] transition text-sm font-light">
-                          {link.name}
-                        </button>
-                      ) : (
-                        <a href={link.href} className="text-[#9CA3AF] hover:text-[#0094FF] transition text-sm font-light">
-                          {link.name}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-16 border-t border-[#1E2024] flex flex-col md:flex-row justify-between items-center gap-4 text-[#9AA3AB] text-sm font-light">
-            <p>© 2025 Lantr — connecting local rooms with the right acts.</p>
-          </div>
-        </div>
-      </footer>
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-      `}</style>
+{link.name}
+</button>
+) : (
+<button onClick={() => scrollToSection(link.href)} className="text-[#9CA3AF] hover:text-[#0094FF] transition text-sm font-light">
+{link.name}
+</button>
+)}
+</li>
+))}
+</ul>
+</div>
+))}
+</div>
+      <div className="pt-16 border-t border-[#1E2024] flex flex-col md:flex-row justify-between items-center gap-4 text-[#9AA3AB] text-sm font-light">
+        <p>© 2025 Lantr — connecting local rooms with the right acts.</p>
+      </div>
     </div>
-  )
+  </footer>
+
+  <style jsx>{`
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+  `}</style>
+
+</div>
+)
 }

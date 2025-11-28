@@ -20,9 +20,9 @@ module.exports = {
           border: '#2A2A2A',
         },
         accent: {
-          primary: '#6366F1', // Indigo
-          secondary: '#8B5CF6', // Purple
-          tertiary: '#EC4899', // Pink
+          primary: '#6366F1', 
+          secondary: '#8B5CF6', 
+          tertiary: '#EC4899', 
         },
         text: {
           primary: '#FFFFFF',
