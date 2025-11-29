@@ -95,7 +95,7 @@ export default function LantrLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden"> bg white 
       {/* Ambient Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #0B0C0E, #000 50%, #000 100%)' }} />
